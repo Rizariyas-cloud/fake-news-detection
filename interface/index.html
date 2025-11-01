@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fake News Detector</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="hero">
+      <h1>Fake News Detector</h1>
+      <p>Enter a news title and content, then use your ML pipeline to test.</p>
+    </header>
+
+    <main class="container">
+      <section class="card">
+        <h2>Input Article</h2>
+        <form>
+          <label>Title</label>
+          <input type="text" placeholder="Type news title here" />
+
+          <label>Content</label>
+          <textarea rows="8" placeholder="Paste news content here"></textarea>
+
+          <button type="button" disabled title="Static demo only">Predict (static UI)</button>
+        </form>
+      </section>
+
+      <section class="card info">
+        <h2>How to use with your model</h2>
+        <ol>
+          <li>Run the pipeline: <code>python main.py</code></li>
+          <li>Use the trained model files in this folder.</li>
+          <li>This page is HTML/CSS only (no JS). Use your preferred backend to connect.</li>
+        </ol>
+      </section>
+    </main>
+
+    <footer>
+      <small>Student project UI (HTML + CSS only)</small>
+    </footer>
+  </div>
+</body>
+</html>

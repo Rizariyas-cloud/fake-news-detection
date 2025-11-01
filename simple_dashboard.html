@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fake News Detection Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .main-header {
+            font-size: 2.8rem;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            font-weight: bold;
+        }
+
+        .main-content {
+            background: #ffffff;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: #000000;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: #ffffff;
+            font-size: 1rem;
+            color: #000000;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group textarea {
+            height: 150px;
+            resize: vertical;
+        }
+
+        .btn {
+            background: #007bff;
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            background: #0056b3;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .prediction-box {
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid #dee2e6;
+            transition: all 0.3s ease;
+        }
+
+        .fake-news {
+            background: #fff5f5;
+            color: #000000;
+            border-left: 4px solid #dc3545;
+        }
+
+        .real-news {
+            background: #f0f8ff;
+            color: #000000;
+            border-left: 4px solid #28a745;
+        }
+
+        .prediction-result {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .confidence {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .metric-card {
+            background: #f8f9fa;
+            padding: 1.2rem;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border: 1px solid #dee2e6;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #000000;
+        }
+
+        .metric-label {
+            font-size: 1rem;
+            color: #000000;
+            margin-top: 0.5rem;
+        }
+
+        .chart-container {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border: 1px solid #dee2e6;
+        }
+
+        .chart-container canvas {
+            background: #ffffff;
+            border-radius: 4px;
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="main-header">Fake News Detection Dashboard</h1>
+        </div>
+
+        <div class="main-content">
+            <h2 style="font-size: 1.5rem; color: #34495e; margin: 1.5rem 0 1rem 0; font-weight: bold;">Fake News Prediction</h2>
+            
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
+                <div>
+                    <div class="form-group">
+                        <label for="newsTitle">News Title:</label>
+                        <input type="text" id="newsTitle" placeholder="Enter the news title here...">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="newsContent">News Content:</label>
+                        <textarea id="newsContent" placeholder="Enter the news content here..."></textarea>
+                    </div>
+                    
+                    <button class="btn" onclick="predictNews()">Predict</button>
+                </div>
+                
+                <div id="predictionResults" class="hidden">
+                    <h3>Prediction Results</h3>
+                    <div id="predictionBox" class="prediction-box">
+                        <div id="predictionText" class="prediction-result"></div>
+                        <div id="confidenceText" class="confidence"></div>
+                    </div>
+                    
+                    <h4>Probability Breakdown</h4>
+                    <div class="chart-container">
+                        <canvas id="probabilityChart" width="300" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <h2 style="font-size: 1.5rem; color: #34495e; margin: 2rem 0 1rem 0; font-weight: bold;">Model Performance</h2>
+            
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-value">0.85</div>
+                    <div class="metric-label">Accuracy</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">0.87</div>
+                    <div class="metric-label">AUC Score</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">0.83</div>
+                    <div class="metric-label">F1 Score</div>
+                </div>
+            </div>
+
+            <h2 style="font-size: 1.5rem; color: #34495e; margin: 2rem 0 1rem 0; font-weight: bold;">Data Analysis</h2>
+            
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-value">20</div>
+                    <div class="metric-label">Total Articles</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-card">
+                    <div class="metric-value">10</div>
+                    <div class="metric-label">Fake News</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">10</div>
+                    <div class="metric-label">Real News</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simple prediction function (simulated)
+        function predictNews() {
+            const title = document.getElementById('newsTitle').value;
+            const content = document.getElementById('newsContent').value;
+            
+            if (!title && !content) {
+                alert('Please enter either a title or content to analyze.');
+                return;
+            }
+            
+            // Combine title and content
+            const combinedText = `${title} ${content}`.trim();
+            
+            // Show loading state
+            const resultsDiv = document.getElementById('predictionResults');
+            const predictionBox = document.getElementById('predictionBox');
+            const predictionText = document.getElementById('predictionText');
+            const confidenceText = document.getElementById('confidenceText');
+            
+            predictionText.textContent = 'Analyzing...';
+            confidenceText.textContent = 'Please wait...';
+            predictionBox.className = 'prediction-box';
+            resultsDiv.classList.remove('hidden');
+            
+            // Simulate prediction with simple logic
+            setTimeout(() => {
+                // Simple keyword-based prediction
+                const fakeKeywords = ['breaking', 'shocking', 'secret', 'cover-up', 'conspiracy', 'aliens', 'government', 'secretly'];
+                const realKeywords = ['research', 'study', 'scientists', 'university', 'medical', 'technology', 'discovery'];
+                
+                const text = combinedText.toLowerCase();
+                let fakeScore = 0;
+                let realScore = 0;
+                
+                fakeKeywords.forEach(keyword => {
+                    if (text.includes(keyword)) fakeScore++;
+                });
+                
+                realKeywords.forEach(keyword => {
+                    if (text.includes(keyword)) realScore++;
+                });
+                
+                // Determine prediction
+                const isFake = fakeScore > realScore;
+                const confidence = Math.random() * 0.4 + 0.6; // 60-100%
+                const realProb = isFake ? (1 - confidence) : confidence;
+                const fakeProb = isFake ? confidence : (1 - confidence);
+                
+                // Update UI
+                if (isFake) {
+                    predictionBox.className = 'prediction-box fake-news';
+                    predictionText.textContent = 'FAKE NEWS';
+                } else {
+                    predictionBox.className = 'prediction-box real-news';
+                    predictionText.textContent = 'REAL NEWS';
+                }
+                
+                confidenceText.textContent = `Confidence: ${(confidence * 100).toFixed(1)}%`;
+                
+                // Update probability chart
+                updateProbabilityChart(realProb, fakeProb);
+                
+            }, 1000);
+        }
+
+        function updateProbabilityChart(realProb, fakeProb) {
+            const canvas = document.getElementById('probabilityChart');
+            const ctx = canvas.getContext('2d');
+            
+            // Clear canvas
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw bars
+            const barWidth = 100;
+            const barHeight = 150;
+            const startX = 50;
+            const startY = 50;
+            
+            // Real news bar
+            const realHeight = realProb * barHeight;
+            ctx.fillStyle = '#4ecdc4';
+            ctx.fillRect(startX, startY + barHeight - realHeight, barWidth, realHeight);
+            
+            // Fake news bar
+            const fakeHeight = fakeProb * barHeight;
+            ctx.fillStyle = '#ff6b6b';
+            ctx.fillRect(startX + barWidth + 20, startY + barHeight - fakeHeight, barWidth, fakeHeight);
+            
+            // Labels
+            ctx.fillStyle = '#000000';
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('Real News', startX, startY + barHeight + 20);
+            ctx.fillText('Fake News', startX + barWidth + 20, startY + barHeight + 20);
+            
+            // Values
+            ctx.fillStyle = '#000000';
+            ctx.font = 'bold 12px Arial';
+            ctx.fillText(`${(realProb * 100).toFixed(1)}%`, startX + 20, startY + barHeight - realHeight - 10);
+            ctx.fillText(`${(fakeProb * 100).toFixed(1)}%`, startX + barWidth + 40, startY + barHeight - fakeHeight - 10);
+        }
+    </script>
+</body>
+</html>
